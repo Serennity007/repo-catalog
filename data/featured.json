@@ -1,0 +1,14 @@
+[
+  {"name":"awesome-stock-quant-skills","en":"Financial screening, consensus ranking and backtesting","zh":"财务筛选、共识排序与含成本回测","entry_label":"Quick start","entry":"https://github.com/Serennity007/awesome-stock-quant-skills/blob/main/docs/quickstart.md"},
+  {"name":"taotao-futures-research","en":"Sector-based futures research and reproducible examples","zh":"按板块研究期货，运行可复现实例","entry_label":"README","entry":"https://github.com/Serennity007/taotao-futures-research"},
+  {"name":"gold-research-skill","en":"Gold, silver and macro context","zh":"黄金、白银联动与宏观背景研究","entry_label":"README","entry":"https://github.com/Serennity007/gold-research-skill"},
+  {"name":"a-share-index-research-skill","en":"A-share index breadth and market style","zh":"大 A 股指、市场宽度与大小盘风格","entry_label":"README","entry":"https://github.com/Serennity007/a-share-index-research-skill"},
+  {"name":"xss-audit-desktop","en":"Static source review with desktop, CLI and browser tools","zh":"桌面、CLI 与浏览器源码静态审计","entry_label":"Releases","entry":"https://github.com/Serennity007/xss-audit-desktop/releases"},
+  {"name":"paper-zh-translation","en":"Translate paper PDFs into Chinese with layout guidance","zh":"论文 PDF 中文翻译与版面检查","entry_label":"README","entry":"https://github.com/Serennity007/paper-zh-translation"},
+  {"name":"beiligong-ppt-skill","en":"Batch PowerPoint formatting and measured font sizing","zh":"PPT 批量排版、字号实测与样式调整","entry_label":"README","entry":"https://github.com/Serennity007/beiligong-ppt-skill"},
+  {"name":"serenity-stock-rss","en":"Finance RSS in Obsidian; derived from Qiaomu AI RSS","zh":"Obsidian 财经阅读器，基于 Qiaomu AI RSS 改造","entry_label":"Releases","entry":"https://github.com/Serennity007/serenity-stock-rss/releases"},
+  {"name":"zhengtao-picks","en":"Curated agent research reading","zh":"智能体协作、记忆与评测精选阅读","entry_label":"README","entry":"https://github.com/Serennity007/zhengtao-picks"},
+  {"name":"agent-trace","en":"Local coding-agent session usage analytics","zh":"本地编码 Agent 会话用量分析","entry_label":"README","entry":"https://github.com/Serennity007/agent-trace"},
+  {"name":"GhostTrack","en":"Public-resource checks; extended upstream fork","zh":"公开资源与域名检查，基于上游 Fork 扩展","entry_label":"Releases","entry":"https://github.com/Serennity007/GhostTrack/releases"},
+  {"name":"Serennity007-portfolio","en":"Selected projects and bilingual resumes","zh":"代表作品与中英文简历","entry_label":"Portfolio","entry":"https://serennity007.github.io/Serennity007-portfolio/"}
+]

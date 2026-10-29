@@ -1,204 +1,229 @@
 #!/usr/bin/env python3
-"""build_catalog.py — 从 GitHub API 生成仓库分类索引 README.md。
-
-用法:
-    python scripts/build_catalog.py            # 生成 README.md
-    python scripts/build_catalog.py --check     # 只比对，不写文件（CI 用）
-
-分类靠逐个仓库读 git tree 判定「有内容 / 只有占位」，不靠 size 字段
-（size 会滞后：新推送的仓库可能仍报 0）。
-"""
+"""Refresh public repository evidence, or render/check a saved snapshot offline."""
 import argparse
-import concurrent.futures
-import io
+import base64
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
 import json
-import os
+from pathlib import Path
 import re
 import subprocess
 import sys
-from collections import defaultdict
-from datetime import date
+import time
+from urllib.parse import quote
 
-OWNER = os.environ.get("CATALOG_OWNER", "Serennity007")
-PLACEHOLDER_README = re.compile(r"^\s*#\s+\S+\s+(developer resource\.?|)\s*$", re.I | re.M)
+ROOT = Path(__file__).resolve().parents[1]
+OWNER = 'Serennity007'
+SNAPSHOT = ROOT / 'data/repositories.json'
+CN_TIME = timezone(timedelta(hours=8))
+STATES = {'content': '✅ 文件内容', 'docs': '📖 README 文档', 'placeholder': '🟡 占位', 'empty': '⚪ 空仓库'}
+GROUPS = [
+    ('markets', '股票 · 期货 · 量化', r'stock|quant|trading|invest|a-share|a-stock|ibkr|tushare|qlib|openbb|moneyprinter|daily_stock|uzi|bitsoul|futures|crude-oil|gold-research|ec-shipping'),
+    ('reading', 'Obsidian · RSS · 精选阅读', r'obsidian|rss|picks|vault|sync|note|feishu-finance'),
+    ('security', '安全 · 审计 · 逆向', r'xss|security|cyber|bug-bounty|ctf|forensic|exploit|hacking|malware|osint|pentest|reverse|vuln|ghosttrack'),
+    ('research', '科研 · 论文 · 演示文稿', r'paper|research-figure|scientific-figure|beiligong|ppt|origin-figure|citation'),
+    ('cli', '命令行与 npm 工具', r'^cli-|^git-|^ai-commit$|^vibe-check$|^agent-trace$|^token-meter$|-cli$|toml-validator|base64|calculator|color-picker|cron-parser|csv-parser|diff-viewer|hash-generator|http-client|json-|lorem|markdown-preview|password-gen|uuid|weather|file-converter|dim-light'),
+    ('agents', 'AI 编码 · Agent · Skills', r'agent|skill|prompt|cursor|claude|copilot|llm|^ai-|awesome-ai|mcp-|npm-audit'),
+    ('learning', '学习路线 · 速查表 · 备考', r'^learn-|cheatsheet|ielts|exam|guizhou|leetcode|roadmap|myielts|study|graduation'),
+    ('infra', '后端 · 基础设施 · 数据', r'docker|kubernetes|devops|terraform|nginx|serverless|monitor|github-actions|data-pipeline|database|microservice|event-driven|api|system-design|postgres|redis|template'),
+    ('frontend', '前端 · 设计 · 图形 · 视频', r'react|vue|svelte|nextjs|astro|tailwind|figma|canva|adobe|sketch|blender|godot|unity|unreal|threejs|shader|webgl|frontend|design|portfolio|resume|video|image|food-map|student-progress|blog|website'),
+    ('languages', '语言与运行时生态', r'^awesome-(go|rust|python|typescript|deno|bun|functional|zig|java|dotnet|linux|macos|windows|terminal|vim|zsh|tmux|git-aliases|npm-packages)'),
+    ('resources', '开发者资源索引', r'^awesome-'),
+    ('other', '其他', r'.*'),
+]
+EXTRA_GROUPS = [('mirrors', '转载 · 镜像'), ('forks', 'Fork · 上游项目'), ('home', '个人主页 · 导航')]
+EXPLICIT = {'serenity-stock-rss': 'reading', 'feishu-finance-digest': 'reading', 'paper-builder-system': 'frontend', 'chatgpt-plus-china-guide': 'resources'}
 
 
-def gh(path):
-    r = subprocess.run(["gh", "api", path], capture_output=True)
-    if r.returncode:
-        return None
-    try:
-        return json.loads(r.stdout.decode("utf-8", "replace"))
-    except Exception:
-        return None
-
-
-def gh_private_count():
-    """私有仓库数量。只有以仓库所有者身份认证时取得到，取不到就返回 None（不写这行）。"""
-    r = subprocess.run(["gh", "repo", "list", OWNER, "--limit", "500", "--visibility", "private",
-                        "--json", "name", "--jq", ".|length"], capture_output=True)
-    if r.returncode:
-        return None
-    try:
-        return int(r.stdout.decode("utf-8", "replace").strip())
-    except ValueError:
-        return None
+def api(path):
+    """Never turn transport/auth/rate-limit failures into empty repository evidence."""
+    for attempt in range(3):
+        proc = subprocess.run(['gh', 'api', path], capture_output=True)
+        if proc.returncode == 0:
+            return json.loads(proc.stdout)
+        if attempt < 2:
+            time.sleep(attempt + 1)
+    raise RuntimeError(f'GitHub request failed: {path}\n{proc.stderr.decode("utf-8", "replace")}')
 
 
 def all_repos():
-    out, page = [], 1
-    while page <= 10:
-        arr = gh(f"users/{OWNER}/repos?per_page=100&page={page}")
-        if not arr:
-            break
-        out += arr
-        if len(arr) < 100:
+    out = []
+    page = 1
+    while True:
+        batch = api(f'users/{OWNER}/repos?type=owner&per_page=100&page={page}')
+        if not isinstance(batch, list):
+            raise ValueError('Expected a repository list')
+        out.extend(r for r in batch if not r.get('private') and r.get('visibility', 'public') == 'public')
+        if len(batch) < 100:
             break
         page += 1
-    seen, uniq = set(), []
-    for x in out:
-        if x["full_name"] not in seen:
-            seen.add(x["full_name"])
-            uniq.append(x)
-    return uniq
+    if not out:
+        raise ValueError('Refusing to replace the catalog with an empty API result')
+    if len({r['name'] for r in out}) != len(out):
+        raise ValueError('Duplicate repositories across API pages; retry the refresh')
+    return out
 
 
-def inspect(x):
-    """Return (has_content, note) determined from the actual file tree."""
-    tree = gh(f"repos/{OWNER}/{x['name']}/git/trees/HEAD?recursive=1")
-    if tree is None:
-        return False, "空仓库（无提交）"
-    blobs = [t for t in tree.get("tree", []) if t["type"] == "blob"]
-    paths = [b["path"] for b in blobs]
-    if not blobs:
-        return False, "空仓库（无提交）"
-    boiler = {"LICENSE", "README.md", ".gitignore", "CHANGELOG.md", "CONTRIBUTING.md",
-              "CODE_OF_CONDUCT.md", ".banner.svg", "README.zh.md", "README.en.md"}
-    real = [p for p in paths if os.path.basename(p) not in boiler]
-    if not real:
-        # README-only: is it a placeholder stub?
-        rm = [p for p in paths if p.lower().startswith("readme")]
-        if rm:
-            data = gh(f"repos/{OWNER}/{x['name']}/readme")
-            if data:
-                import base64
-                text = base64.b64decode(data["content"]).decode("utf-8", "replace")
-                body = re.sub(r"#.*|## License.*|\[MIT\].*|\[GPL.*", "", text, flags=re.S).strip()
-                if len(text) < 200 or PLACEHOLDER_README.search(text) or body in ("", "Developer resource."):
-                    return False, "占位（仅 LICENSE/README）"
-        return False, "占位（仅 LICENSE/README）"
-    top = sorted({p.split("/")[0] for p in real})
-    return True, f"{len(blobs)} 个文件｜{', '.join(top[:4])}"
+def meaningful_readme(text):
+    body = re.sub(r'<!--.*?-->', '', text, flags=re.S)
+    body = re.split(r'^#{1,2}\s+(?:license|许可证)\b', body, flags=re.I | re.M)[0]
+    body = re.sub(r'^\s*#+[^\n]*', '', body, flags=re.M)
+    lines = [line.strip() for line in body.splitlines() if line.strip()]
+    return len(body.strip()) >= 400 and len(lines) >= 5
 
 
-GROUPS = [
-    ("股票 · 量化 · 投资", r"stock|quant|trading|invest|a-share|a-stock|ibkr|tushare|qlib|openbb|moneyprinter|daily_stock|uzi|bitsoul|claude-trading|feishu-finance|finance-digest|earnings"),
-    ("AI 编码 · Agent · 技能包", r"agent|skill|prompt|cursor|claude|copilot|llm|ai-|awesome-ai|mcp-|vibe|git-ai|npm-audit|paper-grill|token-meter|codeburn|git-diff|learn-ai"),
-    ("Obsidian · RSS · 阅读与知识管理", r"obsidian|rss|picks|zhengtao|vault|sync|note"),
-    ("安全 · 渗透 · 逆向", r"security|cyber|bug-bounty|ctf|forensic|exploit|hacking|malware|osint|pentest|reverse|vuln|faraday|havoc|empire|breachweave|cvs|yinvuln"),
-    ("学习路线 · 速查表 · 备考", r"^learn-|cheatsheet|ielts|exam|guizhou|leetcode|roadmap|myielts|study|graduation"),
-    ("命令行与 npm 工具", r"^cli-|-cli$|^ai-commit$|^git-format$|^vibe-check$|^agent-trace$|toml-validator|base64|calculator|color-picker|cron-parser|csv-parser|diff-viewer|hash-generator|http-client|json-|lorem|markdown-preview|password-gen|timer|todo-cli|uuid|weather|file-converter|dim-light"),
-    ("后端 · 基础设施 · 数据", r"docker|kubernetes|devops|terraform|nginx|serverless|monitor|github-actions|data-pipeline|database|microservice|event-driven|api|rest-api|vector-db|system-design|postgres|redis|template"),
-    ("前端 · 设计 · 图形 · 视频", r"react|vue|svelte|nextjs|astro|tailwind|figma|canva|adobe|sketch|blender|godot|unity|unreal|threejs|shader|webgl|frontend|design|portfolio|resume|video|image|food-map|paper-builder|zuograd|student-progress|blog|website"),
-    ("语言与运行时生态", r"^awesome-(go|rust|python|typescript|deno|bun|functional|zig|java|dotnet|linux|macos|windows|terminal|vim|zsh|tmux|git-aliases|npm-packages)"),
-    ("开发者资源索引", r"^awesome-"),
-]
+def inspect_tree(tree, readme=''):
+    if tree.get('truncated'):
+        raise ValueError('Truncated Git tree; refusing an incomplete classification')
+    if 'tree' not in tree or 'sha' not in tree:
+        raise ValueError('Missing Git tree evidence')
+    paths = sorted(t['path'] for t in tree['tree'] if t['type'] == 'blob')
+    boiler = {'license', 'license.md', 'license.txt', 'copying', '.gitignore', '.gitattributes', 'changelog.md', 'contributing.md', 'code_of_conduct.md', '.banner.svg'}
+    real = [p for p in paths if not p.startswith('.github/') and Path(p).name.lower() not in boiler and not (('/' not in p) and p.lower().startswith('readme'))]
+    state = 'content' if real else ('docs' if meaningful_readme(readme) else ('placeholder' if paths else 'empty'))
+    return {'state': state, 'files': len(paths), 'tree_sha': tree['sha'], 'evidence': real[:5], 'readme_path': next((p for p in paths if p.lower() == 'readme.md'), None)}
 
 
-def classify(x):
-    n = x["name"]
-    d = (x.get("description") or "").lower()
-    if x["fork"]:
-        return "Fork · 上游项目"
-    if n.startswith("mirror-"):
-        return "镜像备份 · 他人项目"
-    # 描述自陈 "Unofficial mirror of ..." 的是他人项目的公开转载，不能与原创混在一起。
-    if d.startswith("unofficial mirror") or "for personal learning; all credit" in d:
-        return "他人项目转载 · 非原创"
-    if n == OWNER:
-        return "主页"
-    hay = (n + " " + d).lower()
-    for label, pat in GROUPS:
-        if re.search(pat, hay):
-            return label
-    return "其他"
+def group_for(repo):
+    name = repo['name']
+    desc = (repo.get('description') or '').lower()
+    if repo['fork']:
+        return 'forks'
+    if name.startswith('mirror-') or desc.startswith('unofficial mirror') or 'for personal learning; all credit' in desc:
+        return 'mirrors'
+    if name in (OWNER, 'repo-catalog'):
+        return 'home'
+    if name in EXPLICIT:
+        return EXPLICIT[name]
+    for key, _, pattern in GROUPS:
+        if re.search(pattern, name.lower()):
+            return key
+    raise AssertionError(name)
+
+
+def refresh():
+    def one(repo):
+        name = repo['name']
+        base = f'repos/{OWNER}/{name}'
+        # GitHub size is not reliable evidence of an empty repository.
+        # Only an explicit API empty-repository response counts as empty.
+        proc = subprocess.run(['gh', 'api', f'{base}/git/trees/{quote(repo["default_branch"], safe="")}?recursive=1'], capture_output=True)
+        if proc.returncode and b'Git Repository is empty' in proc.stdout:
+            inspection = {'state': 'empty', 'files': 0, 'tree_sha': None, 'evidence': [], 'readme_path': None}
+        else:
+            tree = json.loads(proc.stdout) if proc.returncode == 0 else api(f'{base}/git/trees/{quote(repo["default_branch"], safe="")}?recursive=1')
+            inspection = inspect_tree(tree)
+            if inspection['state'] == 'placeholder' and inspection['readme_path']:
+                blob = next(t for t in tree['tree'] if t['path'] == inspection['readme_path'])
+                data = api(f'{base}/git/blobs/{blob["sha"]}')
+                readme = base64.b64decode(data['content']).decode('utf-8', 'replace')
+                inspection = inspect_tree(tree, readme)
+        return {'name': name, 'url': repo['html_url'], 'description': repo.get('description') or '', 'private': False, 'fork': repo['fork'], 'archived': repo['archived'], 'default_branch': repo['default_branch'], 'pushed_at': repo['pushed_at'], 'stars': repo['stargazers_count'], 'language': repo.get('language'), 'inspection': inspection}
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        repos = list(pool.map(one, all_repos()))
+    return {'schema_version': 1, 'owner': OWNER, 'checked_on': datetime.now(CN_TIME).date().isoformat(), 'repositories': sorted(repos, key=lambda r: r['name'].lower())}
+
+
+def validate(snapshot):
+    if snapshot['schema_version'] != 1 or snapshot['owner'] != OWNER:
+        raise ValueError('Unexpected snapshot schema or owner')
+    names = set()
+    if not snapshot['repositories']:
+        raise ValueError('Empty snapshot')
+    for repo in snapshot['repositories']:
+        name = repo['name']
+        if not re.fullmatch(r'[A-Za-z0-9_.-]+', name) or name in names:
+            raise ValueError(f'Invalid or duplicate repository: {name}')
+        names.add(name)
+        if repo.get('private') is not False or repo['url'] != f'https://github.com/{OWNER}/{name}':
+            raise ValueError(f'Non-public or unexpected repository: {name}')
+        if repo['inspection']['state'] not in STATES:
+            raise ValueError(f'Unknown content state: {name}')
+    return snapshot
+
+
+def cell(text):
+    return str(text).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('|', '&#124;').replace('\r', ' ').replace('\n', ' ')
+
+
+def render(snapshot):
+    validate(snapshot)
+    repos = snapshot['repositories']
+    date = snapshot['checked_on']
+    counts = Counter(r['inspection']['state'] for r in repos)
+    featured = json.loads((ROOT / 'data/featured.json').read_text(encoding='utf-8'))
+    by_name = {r['name']: r for r in repos}
+    outputs = {}
+    for english, filename in ((True, 'README.md'), (False, 'README.zh-CN.md')):
+        lines = ['[English](README.md) · [简体中文](README.zh-CN.md)', '', '# Serennity007 · Repository Navigator' if english else '# Serennity007 · 开源项目导航', '',
+                 'Find a tool by task, then browse the complete public repository index.' if english else '按用途找工具，查看重点项目与全部公开仓库。', '',
+                 f'[Profile](https://github.com/{OWNER}) · [Portfolio](https://serennity007.github.io/Serennity007-portfolio/) · [Full index / 全量索引](docs/catalog.md) · [Maintenance / 维护说明](docs/maintenance.md)', '',
+                 f'> Checked: **{date} (Asia/Shanghai)** · **{len(repos)} public repositories** · {counts["content"]} with files · {counts["docs"]} README guides · {counts["placeholder"]} placeholders · {counts["empty"]} empty.' if english else f'> 核对日期：**{date}（北京时间）** · **{len(repos)} 个公开仓库** · {counts["content"]} 个含文件内容 · {counts["docs"]} 个 README 文档库 · {counts["placeholder"]} 个占位 · {counts["empty"]} 个空仓库。', '',
+                 '## Start with a task' if english else '## 按用途直达', '',
+                 '| Task | Project | Entry |' if english else '| 用途 | 项目 | 入口 |', '| --- | --- | --- |']
+        for item in featured:
+            name = item['name']
+            if name not in by_name or by_name[name]['inspection']['state'] in ('placeholder', 'empty'):
+                continue
+            lang = 'en' if english else 'zh'
+            lines.append(f'| {cell(item[lang])} | [{name}]({by_name[name]["url"]}) | [{cell(item["entry_label"])}]({item["entry"]}) |')
+        lines += ['', '## Browse by topic' if english else '## 按主题浏览', '', '| Topic / 主题 | Repositories / 仓库 | Content / 有内容 |', '| --- | ---: | ---: |']
+        for key, label in [(k, label) for k, label, _ in GROUPS] + EXTRA_GROUPS:
+            items = [r for r in repos if group_for(r) == key]
+            if items:
+                useful = sum(r['inspection']['state'] in ('content', 'docs') for r in items)
+                lines.append(f'| [{label}](docs/catalog.md#{key}) | {len(items)} | {useful} |')
+        lines += ['', '## Recently updated' if english else '## 最近更新', '', '| Project / 项目 | Pushed / 推送日期（北京时间） |', '| --- | --- |']
+        recent = [r for r in repos if group_for(r) not in ('forks', 'mirrors', 'home') and r['inspection']['state'] in ('content', 'docs')]
+        for repo in sorted(recent, key=lambda r: r['pushed_at'], reverse=True)[:8]:
+            pushed = datetime.fromisoformat(repo['pushed_at'].replace('Z', '+00:00')).astimezone(CN_TIME).date()
+            lines.append(f'| [{repo["name"]}]({repo["url"]}) | {pushed} |')
+        lines += ['', '## Update and verify' if english else '## 更新与校验', '', '```bash', 'python scripts/build_catalog.py             # GitHub API → snapshot + navigation', 'python scripts/build_catalog.py --offline --check', 'python -m unittest discover -s tests -v', '```', '',
+                  'Python 3.11+ and authenticated GitHub CLI (`gh auth login`) are needed for a refresh; offline rendering and tests use only the Python standard library. [Refresh workflow template and classification rules](docs/maintenance.md).' if english else '在线更新需要 Python 3.11+ 和已登录的 GitHub CLI（`gh auth login`）；离线生成和测试只用 Python 标准库。[更新工作流模板与分类规则](docs/maintenance.md)。', '',
+                  'Content labels describe file evidence, not software quality, test coverage or an endorsement. Forks and declared mirrors are listed separately. Only public repository metadata is collected.' if english else '内容状态只描述文件证据，不代表质量、测试通过或推荐评级。Fork 与自述转载单列；数据只采集公开仓库元信息。', '']
+        outputs[filename] = '\n'.join(lines)
+    lines = ['# 全量公开仓库索引', '', '[导航首页](../README.zh-CN.md) · [English](../README.md) · [分类规则与维护](maintenance.md)', '', f'核对日期：{date}（北京时间）。共 {len(repos)} 个公开仓库；在页面内搜索仓库名即可定位。', '', '✅ 含文件内容 · 📖 README 文档库 · 🟡 占位 · ⚪ 空仓库；🔗 Fork · 🪞 自述转载。文件数不代表功能已验证。', '']
+    for key, label in [(k, label) for k, label, _ in GROUPS] + EXTRA_GROUPS:
+        items = [r for r in repos if group_for(r) == key]
+        if not items:
+            continue
+        lines += [f'<a id="{key}"></a>', '', f'## {label}', '', f'{len(items)} 个仓库。', '', '| 仓库 | 内容状态 | 说明 |', '| --- | --- | --- |']
+        for repo in sorted(items, key=lambda r: (r['inspection']['state'] in ('placeholder', 'empty'), r['name'].lower())):
+            state = STATES[repo['inspection']['state']]
+            state += ' · 🔗' if repo['fork'] else (' · 🪞' if key == 'mirrors' else '')
+            state += ' · 已归档' if repo['archived'] else ''
+            desc = cell(repo['description'][:180] or '—')
+            lines.append(f'| [{repo["name"]}]({repo["url"]}) | {state} | {desc} |')
+        lines += ['']
+    outputs['docs/catalog.md'] = '\n'.join(lines)
+    return outputs
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--check", action="store_true")
-    args = ap.parse_args()
-
-    repos = all_repos()
-    print(f"取到 {len(repos)} 个仓库，逐个判定内容状态...", file=sys.stderr)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as ex:
-        flags = list(ex.map(inspect, repos))
-    buckets = defaultdict(list)
-    for x, (has, note) in zip(repos, flags):
-        buckets[classify(x)].append((x, has, note))
-
-    total = len(repos)
-    real = sum(1 for h, _ in flags if h)
-    priv = gh_private_count()
-    lines = [
-        "# 仓库总索引",
-        "",
-        f"共 **{total}** 个公开仓库：**{real} 个有实际内容**，{total - real} 个是只有 LICENSE/README 的占位仓库"
-        "（早期批量创建的主题坑位）。状态按仓库真实文件构成判定，不靠 size 字段"
-        "（size 会滞后，新推送的仓库可能仍报 0）。",
-        "",
-    ]
-    if priv is not None:
-        lines.append(f"另有 **{priv}** 个私有仓库不在本索引内（含第三方项目的私有镜像备份，不适合公开列出）。")
-        lines.append("")
-    lines += [
-        "标记说明：✅ 有内容｜🟡 占位（主题已定、内容待填）｜🪞 他人项目转载（非原创）｜🔗 Fork",
-        "",
-        f"> 本文件由 `python scripts/build_catalog.py` 自动生成，最后更新 {date.today().isoformat()}。",
-        "",
-        "## 目录",
-        "",
-    ]
-    order = [g for g, _ in GROUPS] + ["其他", "他人项目转载 · 非原创", "Fork · 上游项目", "镜像备份 · 他人项目", "主页"]
-    for g in dict.fromkeys(order):
-        if g in buckets:
-            n = len(buckets[g])
-            r = sum(1 for _, h, _ in buckets[g] if h)
-            lines.append(f"- {g} — {n} 个（{r} 有内容）")
-    lines.append("")
-
-    for g in order:
-        if g not in buckets:
-            continue
-        items = sorted(buckets[g], key=lambda t: (not t[1], t[0]["name"]))
-        r = sum(1 for _, h, _ in items if h)
-        lines += [f"## {g}", "", f"{len(items)} 个仓库，其中 {r} 个有内容。", "", "| 仓库 | 状态 | 说明 |", "|---|---|---|"]
-        for x, has, note in items:
-            if x["fork"]:
-                mark = "🔗"
-            elif x["name"].startswith("mirror-"):
-                mark = "📦"
-            elif g == "他人项目转载 · 非原创":
-                mark = "🪞"
-            else:
-                mark = "✅" if has else "🟡"
-            desc = (x.get("description") or "—").replace("|", "｜")
-            if len(desc) > 110:
-                desc = desc[:108] + "…"
-            lines.append(f"| [`{x['name']}`](https://github.com/{OWNER}/{x['name']}) | {mark} | {desc} |")
-        lines.append("")
-
-    text = "\n".join(lines) + "\n"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--offline', action='store_true', help='Render the committed public snapshot without API calls')
+    parser.add_argument('--check', action='store_true', help='Compare without writing; use --offline for reproducible CI')
+    args = parser.parse_args()
+    snapshot = json.loads(SNAPSHOT.read_text(encoding='utf-8')) if args.offline else refresh()
+    outputs = render(snapshot)
     if args.check:
-        old = io.open("README.md", encoding="utf-8").read() if os.path.exists("README.md") else ""
-        strip = lambda s: re.sub(r"最后更新 \d{4}-\d{2}-\d{2}。", "最后更新 。", s)
-        same = strip(old) == strip(text)
-        print("catalog 与现有 README 一致" if same else "catalog 有变化，需重新生成")
-        return 0 if same else 1
-    io.open("README.md", "w", encoding="utf-8").write(text)
-    print(f"README.md 已生成：{total} 个仓库 / {real} 个有内容 / {len(buckets)} 个分类", file=sys.stderr)
+        changed = [name for name, body in outputs.items() if not (ROOT / name).exists() or (ROOT / name).read_text(encoding='utf-8') != body]
+        print('Out of date: ' + ', '.join(changed) if changed else 'Navigation matches snapshot')
+        return int(bool(changed))
+    if not args.offline:
+        SNAPSHOT.parent.mkdir(exist_ok=True)
+        SNAPSHOT.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    for name, body in outputs.items():
+        (ROOT / name).parent.mkdir(parents=True, exist_ok=True)
+        (ROOT / name).write_text(body, encoding='utf-8')
+    print(f'Rendered {len(snapshot["repositories"])} public repositories')
     return 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, ValueError, KeyError) as error:
+        print(error, file=sys.stderr)
+        sys.exit(1)
