@@ -2751,13 +2751,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-29T06:49:00Z",
+      "pushed_at": "2026-10-29T16:42:55Z",
       "stars": 43,
       "language": "Python",
       "inspection": {
         "state": "content",
         "files": 2592,
-        "tree_sha": "dfc23b665991d80f97f1bf49c6213ae111745f30",
+        "tree_sha": "06a2efc5a7e927ac0df63aaa98c1fe8d59745103",
         "evidence": [
           "docs/LANGUAGES.md",
           "docs/LOCALIZATION-VERIFICATION.md",
@@ -6509,20 +6509,24 @@
     {
       "name": "repo-catalog",
       "url": "https://github.com/Serennity007/repo-catalog",
-      "description": "🗂️ 全部公开仓库的分类索引：14 个主题分类，逐个仓库按真实文件构成标注 ✅有内容 / 🟡占位 / 🪞他人项目转载 / 🔗Fork，索引由脚本从 GitHub API 重新生成",
+      "description": "公开项目导航：351 个仓库、15 个分类，中英文入口、按用途直达工具与 Skills，附公开文件证据和可重跑更新脚本。",
       "private": false,
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-12T08:32:49Z",
+      "pushed_at": "2026-10-29T16:42:00Z",
       "stars": 0,
       "language": "Python",
       "inspection": {
         "state": "content",
-        "files": 4,
-        "tree_sha": "42251bc26da3ac0cbe1ff28d1f8527085e0b9ee9",
+        "files": 13,
+        "tree_sha": "04d802dba1bc934caf0b4fb6d6719712f82d674d",
         "evidence": [
-          "scripts/build_catalog.py"
+          "data/featured.json",
+          "data/repositories.json",
+          "docs/catalog.md",
+          "docs/maintenance-2026-10-30.md",
+          "docs/maintenance.md"
         ],
         "readme_path": "README.md"
       }
@@ -6603,13 +6607,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-29T03:50:20Z",
+      "pushed_at": "2026-10-29T16:43:00Z",
       "stars": 2,
       "language": "Python",
       "inspection": {
         "state": "content",
         "files": 10,
-        "tree_sha": "35afe61a5c92c26f253c5240c52c0f20d12ae9cd",
+        "tree_sha": "59b66de86cf7f222dab0fc240bf17d89f011498f",
         "evidence": [
           "CONTEXT.md",
           "docs/adr/0001-language-reduction-en-zh.md",

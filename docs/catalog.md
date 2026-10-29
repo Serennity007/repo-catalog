@@ -489,5 +489,5 @@
 
 | 仓库 | 内容状态 | 说明 |
 | --- | --- | --- |
-| [repo-catalog](https://github.com/Serennity007/repo-catalog) | ✅ 文件内容 | 🗂️ 全部公开仓库的分类索引：14 个主题分类，逐个仓库按真实文件构成标注 ✅有内容 / 🟡占位 / 🪞他人项目转载 / 🔗Fork，索引由脚本从 GitHub API 重新生成 |
+| [repo-catalog](https://github.com/Serennity007/repo-catalog) | ✅ 文件内容 | 公开项目导航：351 个仓库、15 个分类，中英文入口、按用途直达工具与 Skills，附公开文件证据和可重跑更新脚本。 |
 | [Serennity007](https://github.com/Serennity007/Serennity007) | ✅ 文件内容 | BIT M.S. student &#124; 1 KSEM paper (CCF-C) &#124; AI Skills, full-stack apps and developer tools |
