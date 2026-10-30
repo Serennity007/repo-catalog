@@ -186,19 +186,19 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-08-30T01:17:51Z",
+      "pushed_at": "2026-10-30T14:51:20Z",
       "stars": 0,
       "language": "JavaScript",
       "inspection": {
         "state": "content",
-        "files": 31,
-        "tree_sha": "ac7e7ab425aa8723ee017afd5aebe90737e0e8a7",
+        "files": 34,
+        "tree_sha": "33d3a6a29d81f3871e817c6e36ab2c0eb2168ffa",
         "evidence": [
           ".demo.svg",
           "SECURITY.md",
           "bin/cli.js",
-          "package-lock.json",
-          "package.json"
+          "docs/first-run.md",
+          "examples/session-demo/synthetic-demo.json"
         ],
         "readme_path": "README.md"
       }
@@ -2751,13 +2751,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-29T16:42:55Z",
-      "stars": 43,
+      "pushed_at": "2026-10-30T06:51:36Z",
+      "stars": 44,
       "language": "Python",
       "inspection": {
         "state": "content",
-        "files": 2592,
-        "tree_sha": "06a2efc5a7e927ac0df63aaa98c1fe8d59745103",
+        "files": 2599,
+        "tree_sha": "94201eec363f55c5af64c74af235d8a07cf40ce9",
         "evidence": [
           "docs/LANGUAGES.md",
           "docs/LOCALIZATION-VERIFICATION.md",
@@ -3451,13 +3451,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "master",
-      "pushed_at": "2026-10-30T03:45:30Z",
+      "pushed_at": "2026-10-30T14:51:25Z",
       "stars": 0,
       "language": "Python",
       "inspection": {
         "state": "content",
-        "files": 32,
-        "tree_sha": "e456978264a07259b64c7bbf542ed6041468af76",
+        "files": 33,
+        "tree_sha": "3329348ad5f99523674073c95933ce56feae134f",
         "evidence": [
           "SKILL.md",
           "assets/README.md",
@@ -6607,13 +6607,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-29T16:43:00Z",
+      "pushed_at": "2026-10-30T14:51:42Z",
       "stars": 2,
       "language": "Python",
       "inspection": {
         "state": "content",
         "files": 10,
-        "tree_sha": "59b66de86cf7f222dab0fc240bf17d89f011498f",
+        "tree_sha": "f705f62d59b58d1030541531ec33b31a1b2cc976",
         "evidence": [
           "CONTEXT.md",
           "docs/adr/0001-language-reduction-en-zh.md",
@@ -6630,19 +6630,19 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-26T14:42:58Z",
+      "pushed_at": "2026-10-30T14:51:36Z",
       "stars": 2,
       "language": "HTML",
       "inspection": {
         "state": "content",
-        "files": 40,
-        "tree_sha": "ec0412cb74c82d34d6bcab352c8571394e11cf3c",
+        "files": 42,
+        "tree_sha": "25392e93a4f18ea1ee523faf227ed9c9d0c93acb",
         "evidence": [
           "404.html",
+          "assets/featured.css",
           "assets/motion.css",
           "assets/motion.js",
-          "assets/navigation.css",
-          "assets/navigation.js"
+          "assets/navigation.css"
         ],
         "readme_path": "README.md"
       }

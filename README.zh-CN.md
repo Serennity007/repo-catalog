@@ -8,6 +8,19 @@
 
 > 核对日期：**2026-10-30（北京时间）** · **351 个公开仓库** · 106 个含文件内容 · 3 个 README 文档库 · 242 个占位 · 0 个空仓库。
 
+## 六个重点项目
+
+| 项目 | 解决什么问题 | 开始使用 |
+| --- | --- | --- |
+| [awesome-stock-quant-skills](https://github.com/Serennity007/awesome-stock-quant-skills) | 把财务筛选、共识排序和含成本回测串成可复核的研究流程。 | [首次运行](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#quant) |
+| [xss-audit-desktop](https://github.com/Serennity007/xss-audit-desktop) | 让安全审查保留源码位置、有限流向证据和人工复核结论。 | [首次运行](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#audit) |
+| [agent-trace](https://github.com/Serennity007/agent-trace) | 从编码 Agent 的本地日志查看 token、工具调用和成本估算。 | [首次运行](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#agent-trace) |
+| [paper-zh-translation](https://github.com/Serennity007/paper-zh-translation) | 在保留论文版面坐标的前提下，把已有中文译文写回 PDF 并检查。 | [首次运行](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#paper) |
+| [beiligong-ppt-skill](https://github.com/Serennity007/beiligong-ppt-skill) | 把字号、底色、标题与院标调整变成可复跑的课件改版流程。 | [首次运行](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#ppt) |
+| [taotao-futures-research](https://github.com/Serennity007/taotao-futures-research) | 在共同区间、信息时点与样本覆盖明确的条件下比较产业板块。 | [首次运行](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#futures) |
+
+[Inputs, outputs and first runs / 输入、输出与首次运行](docs/projects.md) · [Maintenance priorities / 维护分级](docs/lifecycle.md)
+
 ## 按用途直达
 
 | 用途 | 项目 | 入口 |
@@ -49,14 +62,14 @@
 
 | Project / 项目 | Pushed / 推送日期（北京时间） |
 | --- | --- |
+| [Serennity007-portfolio](https://github.com/Serennity007/Serennity007-portfolio) | 2026-10-30 |
+| [beiligong-ppt-skill](https://github.com/Serennity007/beiligong-ppt-skill) | 2026-10-30 |
+| [agent-trace](https://github.com/Serennity007/agent-trace) | 2026-10-30 |
+| [awesome-stock-quant-skills](https://github.com/Serennity007/awesome-stock-quant-skills) | 2026-10-30 |
 | [ai-commit](https://github.com/Serennity007/ai-commit) | 2026-10-30 |
 | [git-format](https://github.com/Serennity007/git-format) | 2026-10-30 |
-| [beiligong-ppt-skill](https://github.com/Serennity007/beiligong-ppt-skill) | 2026-10-30 |
 | [taotao-futures-research](https://github.com/Serennity007/taotao-futures-research) | 2026-10-30 |
 | [xss-audit-desktop](https://github.com/Serennity007/xss-audit-desktop) | 2026-10-30 |
-| [paper-zh-translation](https://github.com/Serennity007/paper-zh-translation) | 2026-10-30 |
-| [awesome-stock-quant-skills](https://github.com/Serennity007/awesome-stock-quant-skills) | 2026-10-30 |
-| [Serennity007-portfolio](https://github.com/Serennity007/Serennity007-portfolio) | 2026-10-26 |
 
 ## 更新与校验
 

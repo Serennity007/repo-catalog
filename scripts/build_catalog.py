@@ -14,6 +14,7 @@ import time
 from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'scripts'))
 OWNER = 'Serennity007'
 SNAPSHOT = ROOT / 'data/repositories.json'
 CN_TIME = timezone(timedelta(hours=8))
@@ -149,12 +150,15 @@ def cell(text):
 
 def render(snapshot):
     validate(snapshot)
+    from featured_projects import load, guide, table, priority
+    projects = load(snapshot)
+    focus_names = {p['name'] for p in projects['projects']}
     repos = snapshot['repositories']
     date = snapshot['checked_on']
     counts = Counter(r['inspection']['state'] for r in repos)
     featured = json.loads((ROOT / 'data/featured.json').read_text(encoding='utf-8'))
     by_name = {r['name']: r for r in repos}
-    outputs = {}
+    outputs = {'docs/projects.md': guide(projects, snapshot)}
     for english, filename in ((True, 'README.md'), (False, 'README.zh-CN.md')):
         lines = ['[English](README.md) · [简体中文](README.zh-CN.md)', '', '# Serennity007 · Repository Navigator' if english else '# Serennity007 · 开源项目导航', '',
                  'Find a tool by task, then browse the complete public repository index.' if english else '按用途找工具，查看重点项目与全部公开仓库。', '',
@@ -162,6 +166,8 @@ def render(snapshot):
                  f'> Checked: **{date} (Asia/Shanghai)** · **{len(repos)} public repositories** · {counts["content"]} with files · {counts["docs"]} README guides · {counts["placeholder"]} placeholders · {counts["empty"]} empty.' if english else f'> 核对日期：**{date}（北京时间）** · **{len(repos)} 个公开仓库** · {counts["content"]} 个含文件内容 · {counts["docs"]} 个 README 文档库 · {counts["placeholder"]} 个占位 · {counts["empty"]} 个空仓库。', '',
                  '## Start with a task' if english else '## 按用途直达', '',
                  '| Task | Project | Entry |' if english else '| 用途 | 项目 | 入口 |', '| --- | --- | --- |']
+        position = lines.index('## Start with a task' if english else '## 按用途直达')
+        lines[position:position] = ['## Six focus projects' if english else '## 六个重点项目', '', table(projects, 'en' if english else 'zh'), '', '[Inputs, outputs and first runs / 输入、输出与首次运行](docs/projects.md) · [Maintenance priorities / 维护分级](docs/lifecycle.md)', '']
         for item in featured:
             name = item['name']
             if name not in by_name or by_name[name]['inspection']['state'] in ('placeholder', 'empty'):
@@ -183,18 +189,18 @@ def render(snapshot):
                   'Python 3.11+ and authenticated GitHub CLI (`gh auth login`) are needed for a refresh; offline rendering and tests use only the Python standard library. [Refresh workflow template and classification rules](docs/maintenance.md).' if english else '在线更新需要 Python 3.11+ 和已登录的 GitHub CLI（`gh auth login`）；离线生成和测试只用 Python 标准库。[更新工作流模板与分类规则](docs/maintenance.md)。', '',
                   'Content labels describe file evidence, not software quality, test coverage or an endorsement. Forks and declared mirrors are listed separately. Only public repository metadata is collected.' if english else '内容状态只描述文件证据，不代表质量、测试通过或推荐评级。Fork 与自述转载单列；数据只采集公开仓库元信息。', '']
         outputs[filename] = '\n'.join(lines)
-    lines = ['# 全量公开仓库索引', '', '[导航首页](../README.zh-CN.md) · [English](../README.md) · [分类规则与维护](maintenance.md)', '', f'核对日期：{date}（北京时间）。共 {len(repos)} 个公开仓库；在页面内搜索仓库名即可定位。', '', '✅ 含文件内容 · 📖 README 文档库 · 🟡 占位 · ⚪ 空仓库；🔗 Fork · 🪞 自述转载。文件数不代表功能已验证。', '']
+    lines = ['# 全量公开仓库索引', '', '[导航首页](../README.zh-CN.md) · [English](../README.md) · [分类规则与维护](maintenance.md) · [维护优先级](lifecycle.md)', '', f'核对日期：{date}（北京时间）。共 {len(repos)} 个公开仓库；在页面内搜索仓库名即可定位。', '', '✅ 含文件内容 · 📖 README 文档库 · 🟡 占位 · ⚪ 空仓库；🔗 Fork · 🪞 自述转载。文件数不代表功能已验证。', '']
     for key, label in [(k, label) for k, label, _ in GROUPS] + EXTRA_GROUPS:
         items = [r for r in repos if group_for(r) == key]
         if not items:
             continue
-        lines += [f'<a id="{key}"></a>', '', f'## {label}', '', f'{len(items)} 个仓库。', '', '| 仓库 | 内容状态 | 说明 |', '| --- | --- | --- |']
+        lines += [f'<a id="{key}"></a>', '', f'## {label}', '', f'{len(items)} 个仓库。', '', '| 仓库 | 内容状态 | 维护优先级 | 说明 |', '| --- | --- | --- | --- |']
         for repo in sorted(items, key=lambda r: (r['inspection']['state'] in ('placeholder', 'empty'), r['name'].lower())):
             state = STATES[repo['inspection']['state']]
             state += ' · 🔗' if repo['fork'] else (' · 🪞' if key == 'mirrors' else '')
             state += ' · 已归档' if repo['archived'] else ''
             desc = cell(repo['description'][:180] or '—')
-            lines.append(f'| [{repo["name"]}]({repo["url"]}) | {state} | {desc} |')
+            lines.append(f'| [{repo["name"]}]({repo["url"]}) | {state} | {priority(repo, focus_names)} | {desc} |')
         lines += ['']
     outputs['docs/catalog.md'] = '\n'.join(lines)
     return outputs

@@ -8,6 +8,19 @@ Find a tool by task, then browse the complete public repository index.
 
 > Checked: **2026-10-30 (Asia/Shanghai)** · **351 public repositories** · 106 with files · 3 README guides · 242 placeholders · 0 empty.
 
+## Six focus projects
+
+| Project | Purpose | Start |
+| --- | --- | --- |
+| [awesome-stock-quant-skills](https://github.com/Serennity007/awesome-stock-quant-skills) | Connect financial screening, consensus ranking and cost-aware backtest arithmetic. | [First run](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#quant) |
+| [xss-audit-desktop](https://github.com/Serennity007/xss-audit-desktop) | Keep source locations, bounded flow evidence and human decisions together. | [First run](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#audit) |
+| [agent-trace](https://github.com/Serennity007/agent-trace) | Inspect tokens, tool calls and estimated costs from local coding-agent logs. | [First run](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#agent-trace) |
+| [paper-zh-translation](https://github.com/Serennity007/paper-zh-translation) | Write supplied Chinese translations into the paper's PDF coordinates and inspect the result. | [First run](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#paper) |
+| [beiligong-ppt-skill](https://github.com/Serennity007/beiligong-ppt-skill) | Turn font, background, title and logo changes into a repeatable slide workflow. | [First run](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#ppt) |
+| [taotao-futures-research](https://github.com/Serennity007/taotao-futures-research) | Compare sectors with explicit common windows, information cutoffs and sample coverage. | [First run](https://github.com/Serennity007/repo-catalog/blob/main/docs/projects.md#futures) |
+
+[Inputs, outputs and first runs / 输入、输出与首次运行](docs/projects.md) · [Maintenance priorities / 维护分级](docs/lifecycle.md)
+
 ## Start with a task
 
 | Task | Project | Entry |
@@ -49,14 +62,14 @@ Find a tool by task, then browse the complete public repository index.
 
 | Project / 项目 | Pushed / 推送日期（北京时间） |
 | --- | --- |
+| [Serennity007-portfolio](https://github.com/Serennity007/Serennity007-portfolio) | 2026-10-30 |
+| [beiligong-ppt-skill](https://github.com/Serennity007/beiligong-ppt-skill) | 2026-10-30 |
+| [agent-trace](https://github.com/Serennity007/agent-trace) | 2026-10-30 |
+| [awesome-stock-quant-skills](https://github.com/Serennity007/awesome-stock-quant-skills) | 2026-10-30 |
 | [ai-commit](https://github.com/Serennity007/ai-commit) | 2026-10-30 |
 | [git-format](https://github.com/Serennity007/git-format) | 2026-10-30 |
-| [beiligong-ppt-skill](https://github.com/Serennity007/beiligong-ppt-skill) | 2026-10-30 |
 | [taotao-futures-research](https://github.com/Serennity007/taotao-futures-research) | 2026-10-30 |
 | [xss-audit-desktop](https://github.com/Serennity007/xss-audit-desktop) | 2026-10-30 |
-| [paper-zh-translation](https://github.com/Serennity007/paper-zh-translation) | 2026-10-30 |
-| [awesome-stock-quant-skills](https://github.com/Serennity007/awesome-stock-quant-skills) | 2026-10-30 |
-| [Serennity007-portfolio](https://github.com/Serennity007/Serennity007-portfolio) | 2026-10-26 |
 
 ## Update and verify
 

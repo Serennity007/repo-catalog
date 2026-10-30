@@ -12,6 +12,8 @@ This catalog stores public metadata and file evidence. English and Chinese landi
 
 [2026-10-30 PPT 与 CLI 工具维护](tooling-maintenance-2026-10-30.md)
 
+[2026-10-30 六个代表项目、首次运行与维护分级](featured-maintenance-2026-10-30.md)
+
 ## 更新
 
 在仓库根目录运行，先安装 Python 3.11+ 与 GitHub CLI 并执行 `gh auth login`：
@@ -24,6 +26,20 @@ git diff --stat
 ```
 
 `data/featured.json` 保存人工挑选的用途、项目与入口；`data/repositories.json` 保存 API 快照及检查日期。修改推荐项后执行 `python scripts/build_catalog.py --offline` 即可生成文档，无需网络。
+
+六个重点项目的用途、输入、输出、贡献、环境、限制与上手命令统一维护在 `data/projects.json`；[分级规则](lifecycle.md)说明“重点 / 按需 / 参考 / 待评估”的含义。`build_catalog.py` 同时生成中英文重点列表、[首次运行指南](projects.md)和全量索引中的维护优先级。
+
+对个人主页和现有 GitHub Pages 作品集使用同一清单导出（路径为相邻的独立 Git checkout）：
+
+```sh
+python scripts/build_catalog.py --offline
+python scripts/featured_projects.py --profile ../profile --portfolio ../portfolio
+python scripts/featured_projects.py --profile ../profile --portfolio ../portfolio --check
+```
+
+导出器只替换 `<!-- featured-projects:start -->` 与 `<!-- featured-projects:end -->` 中间的内容，不动个人资料和研究经历；缺少、重复或倒置标记会在写入任何目标文件前报错。先检查三个仓库的差异和相关测试，再分别提交、推送。导出是维护者执行的离线步骤，当前没有跨仓库自动推送。
+
+The six selected projects share `data/projects.json`. Export into explicitly chosen profile/portfolio checkouts with the commands above. Only marked sections are replaced; all destinations are preflighted before writes. Review, test and publish each repository separately. This is a manual offline synchronization step, not an enabled cross-repository automation.
 
 生成文件：`README.md`（英语）、`README.zh-CN.md`（中文）、`docs/catalog.md`（全量主题索引）。`--check` 不写文件；`--offline --check` 根据已提交快照比对，不受 GitHub 实时计数或当前日期影响。
 
