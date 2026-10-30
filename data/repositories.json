@@ -6514,13 +6514,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-29T16:45:14Z",
+      "pushed_at": "2026-10-30T02:27:13Z",
       "stars": 0,
       "language": "Python",
       "inspection": {
         "state": "content",
-        "files": 13,
-        "tree_sha": "7e82d7edb808ea881e83c3a1e120c8ee07398975",
+        "files": 14,
+        "tree_sha": "a185a1b32f3df52ad87909a980bdd77d8e5dd7e3",
         "evidence": [
           "data/featured.json",
           "data/repositories.json",
@@ -6799,13 +6799,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-25T17:26:11Z",
+      "pushed_at": "2026-10-30T03:21:07Z",
       "stars": 0,
       "language": "Python",
       "inspection": {
         "state": "content",
-        "files": 457,
-        "tree_sha": "14c5c364474ea76c1feb8d81c724eee5dc074167",
+        "files": 460,
+        "tree_sha": "b7885575d3e5cf66b40d83faddc8ff3f022fd26f",
         "evidence": [
           "SKILL.md",
           "agents/openai.yaml",

@@ -49,6 +49,7 @@ Find a tool by task, then browse the complete public repository index.
 
 | Project / 项目 | Pushed / 推送日期（北京时间） |
 | --- | --- |
+| [taotao-futures-research](https://github.com/Serennity007/taotao-futures-research) | 2026-10-30 |
 | [xss-audit-desktop](https://github.com/Serennity007/xss-audit-desktop) | 2026-10-30 |
 | [paper-zh-translation](https://github.com/Serennity007/paper-zh-translation) | 2026-10-30 |
 | [awesome-stock-quant-skills](https://github.com/Serennity007/awesome-stock-quant-skills) | 2026-10-30 |
@@ -56,7 +57,6 @@ Find a tool by task, then browse the complete public repository index.
 | [a-share-index-research-skill](https://github.com/Serennity007/a-share-index-research-skill) | 2026-10-26 |
 | [ec-shipping-research-skill](https://github.com/Serennity007/ec-shipping-research-skill) | 2026-10-26 |
 | [crude-oil-research-skill](https://github.com/Serennity007/crude-oil-research-skill) | 2026-10-26 |
-| [gold-research-skill](https://github.com/Serennity007/gold-research-skill) | 2026-10-26 |
 
 ## Update and verify
 
