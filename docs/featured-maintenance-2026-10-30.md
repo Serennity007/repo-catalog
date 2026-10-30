@@ -34,3 +34,17 @@
 共 100 项本地自动检查，六条首次运行路径另行验证。未运行真实论文翻译、Office 渲染、实时行情研究，未重建桌面发布包或更新 npm 已发布版本。
 
 GitHub 个人主页的六项 README 精选不等于账户的 Pinned 设置。网页未登录，本轮未修改置顶栏。
+
+## 已发布源码与远端检查
+
+| 仓库 | 本轮源码提交 |
+| --- | --- |
+| Agent Trace | [33d3a6a：目录与 JSON 修复](https://github.com/Serennity007/agent-trace/commit/33d3a6a29d81f3871e817c6e36ab2c0eb2168ffa)；[9d8a644：旧版 CI 测试清理兼容](https://github.com/Serennity007/agent-trace/commit/9d8a64463dd262ce1246d89f588fdede8e4187fb) |
+| PPT | [3329348：无 Office 合成上手演示](https://github.com/Serennity007/beiligong-ppt-skill/commit/3329348) |
+| Profile | [f705f62：六项精选与首次运行入口](https://github.com/Serennity007/Serennity007/commit/f705f62) |
+| Portfolio | [25392e9：六项静态展示与旧数量校正](https://github.com/Serennity007/Serennity007-portfolio/commit/25392e93a4f18ea1ee523faf227ed9c9d0c93acb) |
+| Catalog | [cfbe60f：统一清单、上手指南与维护分级](https://github.com/Serennity007/repo-catalog/commit/cfbe60f) |
+
+[Agent Trace CI](https://github.com/Serennity007/agent-trace/actions/runs/41075644602) 在 Node 16 / 18 / 20 三个既有任务上通过；首次失败来自旧 Node 16 不支持测试清理钩子，后改成 `try/finally`，未跳过场景或修改工作流。上手环境仍建议 Node 18+。
+
+[作品集 Pages 部署](https://github.com/Serennity007/Serennity007-portfolio/actions/runs/41075382585)成功；已在公开网址看到六个入口。导航本轮执行的是本地离线检查，不把未启用的导航工作流模板称为 CI 通过。

@@ -62,9 +62,9 @@ Find a tool by task, then browse the complete public repository index.
 
 | Project / 项目 | Pushed / 推送日期（北京时间） |
 | --- | --- |
+| [agent-trace](https://github.com/Serennity007/agent-trace) | 2026-10-30 |
 | [Serennity007-portfolio](https://github.com/Serennity007/Serennity007-portfolio) | 2026-10-30 |
 | [beiligong-ppt-skill](https://github.com/Serennity007/beiligong-ppt-skill) | 2026-10-30 |
-| [agent-trace](https://github.com/Serennity007/agent-trace) | 2026-10-30 |
 | [awesome-stock-quant-skills](https://github.com/Serennity007/awesome-stock-quant-skills) | 2026-10-30 |
 | [ai-commit](https://github.com/Serennity007/ai-commit) | 2026-10-30 |
 | [git-format](https://github.com/Serennity007/git-format) | 2026-10-30 |
