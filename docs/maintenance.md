@@ -10,6 +10,8 @@ This catalog stores public metadata and file evidence. English and Chinese landi
 
 [2026-10-30 期货与股指研究仓库导出修复与复验](market-maintenance-2026-10-30.md)
 
+[2026-10-30 PPT 与 CLI 工具维护](tooling-maintenance-2026-10-30.md)
+
 ## 更新
 
 在仓库根目录运行，先安装 Python 3.11+ 与 GitHub CLI 并执行 `gh auth login`：

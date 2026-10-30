@@ -261,13 +261,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-11T13:54:36Z",
+      "pushed_at": "2026-10-30T03:45:40Z",
       "stars": 1,
       "language": "JavaScript",
       "inspection": {
         "state": "content",
-        "files": 27,
-        "tree_sha": "ce272c0cdc8585bc8a2335fd7efa5b3919d616a7",
+        "files": 28,
+        "tree_sha": "bb0910688da1b15741e1d608f9d96fc8e4e32e50",
         "evidence": [
           ".npmignore",
           "SECURITY.md",
@@ -3451,13 +3451,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "master",
-      "pushed_at": "2026-10-21T11:52:54Z",
+      "pushed_at": "2026-10-30T03:45:30Z",
       "stars": 0,
       "language": "Python",
       "inspection": {
         "state": "content",
-        "files": 30,
-        "tree_sha": "decc6c099b374165181eb3d714c928db278e5100",
+        "files": 32,
+        "tree_sha": "e456978264a07259b64c7bbf542ed6041468af76",
         "evidence": [
           "SKILL.md",
           "assets/README.md",
@@ -4944,19 +4944,19 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-11T13:54:39Z",
+      "pushed_at": "2026-10-30T03:45:35Z",
       "stars": 0,
       "language": "JavaScript",
       "inspection": {
         "state": "content",
-        "files": 22,
-        "tree_sha": "62f7a9fa0c4edb5d2df636b336cd85c5f77fb2b7",
+        "files": 23,
+        "tree_sha": "6b2c995a5a7eae893cfd7298cb938ac5db47e808",
         "evidence": [
           "SECURITY.md",
           "bin/cli.js",
           "package-lock.json",
           "package.json",
-          "test/test.js"
+          "test/cli.integration.js"
         ],
         "readme_path": "README.md"
       }
@@ -6514,13 +6514,13 @@
       "fork": false,
       "archived": false,
       "default_branch": "main",
-      "pushed_at": "2026-10-30T02:27:13Z",
+      "pushed_at": "2026-10-30T03:22:31Z",
       "stars": 0,
       "language": "Python",
       "inspection": {
         "state": "content",
-        "files": 14,
-        "tree_sha": "a185a1b32f3df52ad87909a980bdd77d8e5dd7e3",
+        "files": 15,
+        "tree_sha": "cc34ac254db9f946fe50f1fcffaec93a47900414",
         "evidence": [
           "data/featured.json",
           "data/repositories.json",
