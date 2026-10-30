@@ -6,6 +6,8 @@ This catalog stores public metadata and file evidence. English and Chinese landi
 
 [2026-10-30 检查范围、修改与验证记录](maintenance-2026-10-30.md)
 
+[2026-10-30 最新仓库修复与源码复验](recent-maintenance-2026-10-30.md)
+
 ## 更新
 
 在仓库根目录运行，先安装 Python 3.11+ 与 GitHub CLI 并执行 `gh auth login`：
